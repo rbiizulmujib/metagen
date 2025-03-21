@@ -74,7 +74,7 @@ export default function Home() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (!data?.user) navigate.push("/masuk");
+      if (!data?.user) navigate.push("/login");
       else {
         setUser(data.user);
         fetchUserCredit(data.user.email);
@@ -82,10 +82,10 @@ export default function Home() {
     });
   }, [navigate]);
 
-  const handleFileChange = (e) => {
-    const newFiles = Array.from(e.target.files);
-    setFiles(prevFiles => [...prevFiles, ...newFiles]); // Tambahkan file baru ke array yang sudah ada
-  };
+  // const handleFileChange = (e) => {
+  //   const newFiles = Array.from(e.target.files);
+  //   setFiles(prevFiles => [...prevFiles, ...newFiles]); // Tambahkan file baru ke array yang sudah ada
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -188,16 +188,45 @@ export default function Home() {
     }
   };
 
+  const handleFileChange = (e) => {
+    const newFiles = Array.from(e.target.files);
+    const validFiles = newFiles.filter(file => file.size <= 4 * 1024 * 1024);
+  
+    if (validFiles.length !== newFiles.length) {
+      alert('Beberapa file tidak ditambahkan karena ukurannya lebih dari 4MB.');
+    }
+  
+    setFiles(prevFiles => [...prevFiles, ...validFiles]); // Hanya tambahkan file yang valid
+  };
+  
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+  
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const newFiles = Array.from(e.dataTransfer.files);
-      setFiles(prevFiles => [...prevFiles, ...newFiles]); // Tambahkan file baru ke array yang sudah ada
+      const validFiles = newFiles.filter(file => file.size <= 4 * 1024 * 1024);
+  
+      if (validFiles.length !== newFiles.length) {
+        alert('Beberapa file tidak ditambahkan karena ukurannya lebih dari 4MB.');
+      }
+  
+      setFiles(prevFiles => [...prevFiles, ...validFiles]); // Hanya tambahkan file yang valid
     }
   };
+  
+//build
+  // const handleDrop = (e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setDragActive(false);
+
+  //   if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+  //     const newFiles = Array.from(e.dataTransfer.files);
+  //     setFiles(prevFiles => [...prevFiles, ...newFiles]); // Tambahkan file baru ke array yang sudah ada
+  //   }
+  // };
 
   const removeFile = (indexToRemove) => {
     setFiles(files.filter((_, index) => index !== indexToRemove));
@@ -206,7 +235,7 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      navigate.push('/masuk');
+      navigate.push('/login');
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -256,7 +285,7 @@ export default function Home() {
               <input
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/png, image/jpeg, image/jpg"
                 onChange={handleFileChange}
                 className="hidden"
                 id="file-upload"
