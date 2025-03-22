@@ -59,7 +59,7 @@ export async function POST(request) {
         // Convert image to generative part
         const imagePart = bufferToGenerativePart(buffer, image.type);
 
-        const prompt = "Berikan judul, deskripsi dan 20 keywords dalam bahasa inggris, pisahkan keywords dengan koma. Foto ini untuk dijual di microstock.\nDan berikan output seperti ini:\n\nTitle: title value\nDescription: descriptions value\nKeywords: list of keywords value";
+        const prompt = "Berikan judul, deskripsi dan 50 keywords dalam bahasa inggris, pisahkan keywords dengan koma. Foto ini untuk dijual di microstock.\nDan berikan output seperti ini:\n\nTitle: title value\nDescription: descriptions value\nKeywords: list of keywords value";
 
         // Generate meta tags
         const result = await model.generateContent([prompt, imagePart]);
