@@ -74,7 +74,7 @@ export default function Home() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (!data?.user) navigate.push("/masuk");
+      if (!data?.user) navigate.push("/login");
       else {
         setUser(data.user);
         fetchUserCredit(data.user.email);
@@ -218,7 +218,7 @@ const exportToCSV = () => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      navigate.push('/masuk');
+      navigate.push('/login');
     } catch (error) {
       console.error('Error logging out:', error);
     }
