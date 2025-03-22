@@ -74,7 +74,7 @@ export default function Home() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (!data?.user) navigate.push("/login");
+      if (!data?.user) navigate.push("/masuk");
       else {
         setUser(data.user);
         fetchUserCredit(data.user.email);
@@ -136,27 +136,39 @@ export default function Home() {
     setLoading(false);
   };
 
-  // Fungsi untuk export ke CSV
-  const exportToCSV = () => {
-    if (results.length === 0) return;
+  // Fungsi untuk export ke CSV yang menangani nilai dengan koma
+const exportToCSV = () => {
+  if (results.length === 0) return;
 
-    const csvContent = [
-      ['No', 'Title', 'Filename', 'Description', 'Keywords'],
-      ...results.map((item, index) => [
-        index + 1,
-        item.title,
-        item.filename,
-        item.description,
-        item.keywords
-      ])
-    ]
-    .map(row => row.join(','))
-    .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'meta_tags_result.csv');
+  // Fungsi untuk memformat nilai CSV dengan benar
+  const formatCSVValue = (value) => {
+    // Konversi nilai non-string menjadi string
+    const stringValue = String(value);
+    
+    // Jika nilai mengandung koma, kutip ganda, atau baris baru, perlu di-escape
+    if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+      // Escape tanda kutip dengan menggandakan mereka dan apit seluruh string dengan kutip
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    return stringValue;
   };
 
+  const csvContent = [
+    ['No', 'Title', 'Filename', 'Description', 'Keywords'],
+    ...results.map((item, index) => [
+      index + 1,
+      item.title,
+      item.filename,
+      item.description,
+      item.keywords
+    ])
+  ]
+  .map(row => row.map(formatCSVValue).join(','))
+  .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  saveAs(blob, 'meta_tags_result_designtools.my.id.csv');
+};
   // Fungsi untuk export ke XLSX
   const exportToXLSX = () => {
     if (results.length === 0) return;
@@ -206,7 +218,7 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      navigate.push('/login');
+      navigate.push('/masuk');
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -256,7 +268,7 @@ export default function Home() {
               <input
                 type="file"
                 multiple
-                accept="image/png, image/jpeg, image/jpg"
+                accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
                 id="file-upload"
@@ -320,6 +332,16 @@ export default function Home() {
             >
               {loading ? 'Memproses...' : 'Generate Meta Tags'}
             </Button>
+            {files.length > 0 && (
+              <Button 
+                type="button" 
+                variant="outline"
+                className="w-full mt-2 border-red-500 text-red-500 hover:bg-red-50"
+                onClick={() => setFiles([])}
+              >
+                Reset File
+              </Button>
+            )}
           </form>
 
           {results.length > 0 && (
